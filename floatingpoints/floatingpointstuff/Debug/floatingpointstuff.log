@@ -1,0 +1,14 @@
+﻿Build started 11/24/2014 7:01:06 PM.
+     1>Project "c:\Users\student\documents\visual studio 2012\Projects\floatingpointstuff\floatingpointstuff\floatingpointstuff.vcxproj" on node 2 (Build target(s)).
+     1>_MASM:
+         Assembling IEEE_float.asm...
+         cmd.exe /C "C:\Users\student\AppData\Local\Temp\tmp5ff4f1d1b3bc4a62a4218241d66657bd.cmd"
+         ml.exe /c /nologo /Zi /Fo"Debug\IEEE_float.obj" /W3 /errorReport:prompt  /TaIEEE_float.asm
+       Link:
+         C:\Program Files\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"c:\users\student\documents\visual studio 2012\Projects\floatingpointstuff\Debug\floatingpointstuff.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"c:\users\student\documents\visual studio 2012\Projects\floatingpointstuff\Debug\floatingpointstuff.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /ENTRY:"main" /DYNAMICBASE /NXCOMPAT /IMPLIB:"c:\users\student\documents\visual studio 2012\Projects\floatingpointstuff\Debug\floatingpointstuff.lib" /MACHINE:X86 Debug\IEEE_float.obj
+         floatingpointstuff.vcxproj -> c:\users\student\documents\visual studio 2012\Projects\floatingpointstuff\Debug\floatingpointstuff.exe
+     1>Done Building Project "c:\Users\student\documents\visual studio 2012\Projects\floatingpointstuff\floatingpointstuff\floatingpointstuff.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:05.02

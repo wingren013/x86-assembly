@@ -1,0 +1,26 @@
+.586
+.model flat
+.stack 4096
+
+SECTION .data
+
+fortytwo resd 1
+
+SECTION .text
+
+yodawg:
+	mov al, 0b00101010
+	mov ah, 0b00101010
+	mov DWORD [fortytwo], ax
+	sal eax, 16
+	add DWORD [fortytwo], eax ; so I put a 42 in your 42
+	mov dl, 2
+while:
+		cmp dl, 0
+		je end
+libft:	add DWORD [fortytwo], dl
+		dec dl
+		jmp while ; so now you can off by one error while you libft
+end:
+	mov eax, DWORD [fortytwo]
+	ret
