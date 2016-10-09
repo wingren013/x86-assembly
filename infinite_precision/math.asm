@@ -1,23 +1,42 @@
 ; code for infinite precsion adding
 .586
 .model flat
-.stack 409600
+.stack 65536
 
 .DATA
-BIGNUM dword 409600 DUP (0) ; reserve a bunch of memory
-TEMP dword 409600 DUP (0) ; reserve a bunch of memory
-ANSWER dword 409600 DUP (0) ; reserve a bunch of memory for our answer
+BIGNUM dword 65536 DUP (0) ; reserve a bunch of memory
+TEMP dword 65536 DUP (0) ; reserve a bunch of memory
+ANSWER dword 65536 DUP (0) ; reserve a bunch of memory for our answer
+INSTRUC byte 0
 BASE byte ? ; we need to know the base for obvious reasons
 .CODE
 
 main proc
-	XOR eax, eax ; set accumulator to 0
+	xor eax, eax ; set accumulator to 0
 	push ebp
 	mov ebp, esp
 main endp
 
 math proc
-
+	lea esi, BIGNUM
+	lea edi, TEMP
+	cmp INSTRUC, 0
+	je addi
+	jg multi
+	jl subt
+	mov eax, -1
+	jmp end
+	addi:
+			call addition
+			jmp end
+	subt:
+			call subtraction
+			jmp end
+	multi:
+			call mulitplication
+			jmp end
+	end:
+		ret
 math endp
 
 ;pseudocode
@@ -28,10 +47,7 @@ math endp
 addition proc
 ; [esi] + [edi] = [ecx]
 	XOR ecx, ecx
-	LEA ecx, ANSWER
-	MOV [ecx], [esi]
-	ADD [ecx], [edi]
-	XOR eax, eax
+
 	RET
 addition endp
 
