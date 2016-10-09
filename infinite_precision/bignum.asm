@@ -7,7 +7,8 @@
 BIGNUM dword 65536 DUP (0) ; reserve a bunch of memory
 OPERATOR dword 65536 DUP (0) ; reserve a bunch of memory
 ANSWER dword 65536 DUP (0) ; reserve a bunch of memory for our answer
-INSTRUC byte 0
+SAVEFLAGS byte ?
+INSTRUC byte ?
 BASE byte ? ; we need to know the base for obvious reasons
 .CODE
 
@@ -47,12 +48,14 @@ addition proc
 	start:	
 			mov eax, [edi] ; move our current section of OPERATOR to eax
 			add [esi], eax ; add the current section of OPERATOR to BIGNUM
-			mov bl, cf
+			lahf
+			mov SAVEFLAGS, ah ; save our carry flag
 			jmp increment
 	overflow:
 			mov eax, [edi]
 			adc [esi], eax
-			mov bl, cf
+			lahf
+			mov SAVEFLAGS, ah
 			jmp increment
 	continue:
 			cmp [edi], 0
@@ -63,26 +66,31 @@ addition proc
 	increment:
 			add edi, 4 ; increment our pointers
 			add esi, 4 ; increment our pointers
-			mov cf, bl
+			mov ah, SAVEFLAGS
+			sahf ; restore our carry flag
 			jc overflow
 			jmp continue
 	end:
 			ret
 addition endp
 
-altadd proc
+altadd proc ; should be more efficient
 	start:
 			mov eax, [edi]
 			add [esi], eax
-			mov bl, cf
+			lahf
 			add esi, 4
 			add edi, 4
-			mov cf, bl
+			sahf
 			jnc continue
+	overflow:	
 			mov eax, [edi]
 			adc [esi], eax
-			mov eax, [edi+4]
-			adc [esi+4], eax
+			lahf
+			add edi, 4
+			add esi, 4
+			sahf
+			jc overflow
 	continue:
 			cmp [edi], 0
 			jne start
