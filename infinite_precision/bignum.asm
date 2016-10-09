@@ -86,20 +86,33 @@ altadd proc ; should be more efficient
 			add esi, 4
 			add edi, 4
 			sahf
+			jc loop
 			cmp [edi], 0
 			jne loop
 			cmp [esi], 0
 			jne loop
-	end:
-			ret
+	ret
 altadd endp
 
 subtraction proc
 ; [esi] - [edi]
-	start:
+	mov eax, [edi]
+	add [esi], eax
+	jmp continue
+	loop:
 			mov eax, [edi]
-			sub [esi], eax
-	
+			adc [esi], eax
+	continue:
+			lahf
+			add esi, 4
+			add edi, 4
+			sahf
+			jc loop
+			cmp [edi], 0
+			jne loop
+			cmp [esi], 0
+			jne loop
+	ret	
 subtraction endp
 
 multiplication proc
