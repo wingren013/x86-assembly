@@ -1,4 +1,4 @@
-; code for infinite precsion adding
+; code for infinite precsion math
 .586
 .model flat
 .stack 65536
