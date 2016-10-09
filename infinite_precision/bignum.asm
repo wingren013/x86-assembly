@@ -9,6 +9,7 @@ OPERATOR dword 65536 DUP (0) ; reserve a bunch of memory
 ANSWER dword 65536 DUP (0) ; reserve a bunch of memory for our answer
 SAVEFLAGS byte ?
 INSTRUC byte ?
+TEMP dword 65536 DUP (0) ; for saving a copy of our bignum
 BASE byte ? ; we need to know the base for obvious reasons
 .CODE
 
@@ -115,16 +116,25 @@ subtraction proc
 	ret	
 subtraction endp
 
+; wip section
+
 multiplication proc
-; [esi] * [edi] = [ecx] := eax
-	XOR ecx, ecx
-	LEA ecx
-	start:
-			ADD [ecx], [esi]
-			DEC [edi]
-			JNZ start
-	end:
-	RET
+; [esi] * [edi]
+	call copy
+	oper_loop:
+			mov ebx, [edi]
+	binum_loop:
+			mov eax, [bignum]
+			mul ebx
+			mov [bignum], eax
+			mov ecx, edx
+	iterate:
+			add edi, 4
+			add esi, 4
 multiplication endp
+
+altmul proc
+; [esi] * [edi]
+altmul endp
 
 END
