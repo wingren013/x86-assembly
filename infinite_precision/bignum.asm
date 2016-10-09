@@ -59,9 +59,9 @@ addition proc
 			jmp increment
 	continue:
 			cmp [edi], 0
-			jne start ; continue if edi still has stuff
+			jne overflow ; continue if edi still has stuff
 			cmp [esi], 0
-			jne start ; continue if esi still has stuff
+			jne overflow ; continue if esi still has stuff
 			jmp end
 	increment:
 			add edi, 4 ; increment our pointers
@@ -75,27 +75,21 @@ addition proc
 addition endp
 
 altadd proc ; should be more efficient
-	start:
-			mov eax, [edi]
-			add [esi], eax
-			lahf
-			add esi, 4
-			add edi, 4
-			sahf
-			jnc continue
-	overflow:	
+	mov eax, [edi]
+	add [esi], eax
+	jmp continue
+	loop:
 			mov eax, [edi]
 			adc [esi], eax
-			lahf
-			add edi, 4
-			add esi, 4
-			sahf
-			jc overflow
 	continue:
+			lahf
+			add esi, 4
+			add edi, 4
+			sahf
 			cmp [edi], 0
-			jne start
+			jne loop
 			cmp [esi], 0
-			jne start
+			jne loop
 	end:
 			ret
 altadd endp
