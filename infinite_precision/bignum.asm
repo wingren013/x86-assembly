@@ -5,7 +5,7 @@
 
 .DATA
 BIGNUM dword 65536 DUP (0) ; reserve a bunch of memory
-TEMP dword 65536 DUP (0) ; reserve a bunch of memory
+OPERATOR dword 65536 DUP (0) ; reserve a bunch of memory
 ANSWER dword 65536 DUP (0) ; reserve a bunch of memory for our answer
 INSTRUC byte 0
 BASE byte ? ; we need to know the base for obvious reasons
@@ -19,13 +19,11 @@ main endp
 
 math proc
 	lea esi, BIGNUM
-	lea edi, TEMP
+	lea edi, OPERATOR
 	cmp INSTRUC, 0
 	je addi
 	jg multi
 	jl subt
-	mov eax, -1
-	jmp end
 	addi:
 			call addition
 			jmp end
@@ -36,7 +34,7 @@ math proc
 			call mulitplication
 			jmp end
 	end:
-		ret
+			ret
 math endp
 
 ;pseudocode
@@ -45,19 +43,61 @@ math endp
 ; store an array of dwords and treat it as a very big binary representation number
 
 addition proc
-; [esi] + [edi] = [ecx]
-	XOR ecx, ecx
-
-	RET
+; [esi] + [edi]
+	start:	
+			mov eax, [edi] ; move our current section of OPERATOR to eax
+			add [esi], eax ; add the current section of OPERATOR to BIGNUM
+			mov bl, cf
+			jmp increment
+	overflow:
+			mov eax, [edi]
+			adc [esi], eax
+			mov bl, cf
+			jmp increment
+	continue:
+			cmp [edi], 0
+			jne start ; continue if edi still has stuff
+			cmp [esi], 0
+			jne start ; continue if esi still has stuff
+			jmp end
+	increment:
+			add edi, 4 ; increment our pointers
+			add esi, 4 ; increment our pointers
+			mov cf, bl
+			jc overflow
+			jmp continue
+	end:
+			ret
 addition endp
 
+altadd proc
+	start:
+			mov eax, [edi]
+			add [esi], eax
+			mov bl, cf
+			add esi, 4
+			add edi, 4
+			mov cf, bl
+			jnc continue
+			mov eax, [edi]
+			adc [esi], eax
+			mov eax, [edi+4]
+			adc [esi+4], eax
+	continue:
+			cmp [edi], 0
+			jne start
+			cmp [esi], 0
+			jne start
+	end:
+			ret
+altadd endp
+
 subtraction proc
-; [esi] - [edi] = [ecx]
-	XOR ecx, ecx
-	MOV [ecx], [esi]
-	SUB [ecx], [edi]
-	XOR eax, eax
-	RET
+; [esi] - [edi]
+	start:
+			mov eax, [edi]
+			sub [esi], eax
+	
 subtraction endp
 
 multiplication proc
