@@ -9,6 +9,7 @@ OPERATOR dword 65536 DUP (0) ; reserve a bunch of memory
 ANSWER dword 65536 DUP (0) ; reserve a bunch of memory for our answer
 SAVEFLAGS byte ?
 INSTRUC byte ?
+CARRYSAVE dword 4 DUP (0)
 TEMP dword 65536 DUP (0) ; for saving a copy of our bignum
 BASE byte ? ; we need to know the base for obvious reasons
 .CODE
@@ -98,11 +99,11 @@ altadd endp
 subtraction proc
 ; [esi] - [edi]
 	mov eax, [edi]
-	add [esi], eax
+	sub [esi], eax
 	jmp continue
 	loop:
 			mov eax, [edi]
-			adc [esi], eax
+			subb [esi], eax
 	continue:
 			lahf
 			add esi, 4
@@ -116,21 +117,59 @@ subtraction proc
 	ret	
 subtraction endp
 
+bignum_mul proc
+; just copy the behaivor of mul
+	xor ecx, ecx
+	mov ebx, [esi]
+	mul ebx
+	mov [esi], ebx
+	loop:
+		lea edi, CARRYSAVE
+		mov [edi], edx ; save the carried part
+		add ecx, 4
+		add esi, ecx
+		cmp [esi], 0
+		lahf
+		mov SAVEFLAGS, ah ; save our flags, we need zf
+		call altadd
+		sahf
+		je end
+		lea esi, BIGNUM
+		add esi, ecx
+		mov ebx, [esi]
+		mul ebx
+		mov [esi], ebx
+		jmp loop
+	end:
+		ret
+bignum_mul endp
+
 ; wip section
 
-multiplication proc
+multiply_dword proc
 ; [esi] * [edi]
-	call copy
-	oper_loop:
-			mov ebx, [edi]
-	binum_loop:
-			mov eax, [bignum]
-			mul ebx
-			mov [bignum], eax
-			mov ecx, edx
-	iterate:
-			add edi, 4
-			add esi, 4
+; this should multiply dwords
+	mov ecx, [esi]
+	mov edx, [edi]
+	xor eax, eax
+;	test edx, 00000000000000000000000000000001b
+	testit:
+		test edx, 1b
+		je loop
+		add eax, ecx
+	loop:
+		add ecx, ecx
+		shr edx, 1
+		cmp edx, 1
+		jbe end
+		jmp testit
+	end:
+		add eax, ecx
+		ret
+multiply_dword endp
+
+multiplication proc
+
 multiplication endp
 
 altmul proc
