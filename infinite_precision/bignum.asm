@@ -45,8 +45,10 @@ math endp
 ; store an array of digits and a number representing the number of digits, preform math one digit at a time
 ; store an array of dwords and treat it as a very big binary representation number
 
+
 addition proc
 ; [esi] + [edi]
+	mov ecx, 65536
 	start:	
 			mov eax, [edi] ; move our current section of OPERATOR to eax
 			add [esi], eax ; add the current section of OPERATOR to BIGNUM
@@ -60,21 +62,22 @@ addition proc
 			mov SAVEFLAGS, ah
 			jmp increment
 	continue:
-			cmp [edi], 0
-			jne overflow ; continue if edi still has stuff
-			cmp [esi], 0
-			jne overflow ; continue if esi still has stuff
+			cmp ecx, 0
+			jne overflow ; continue if our counter is not 0
 			jmp end
 	increment:
 			add edi, 4 ; increment our pointers
 			add esi, 4 ; increment our pointers
-			mov ah, SAVEFLAGS
+			mov ah, SAVEFLAGS	
+			dec ecx ; decrement our counter
 			sahf ; restore our carry flag
 			jc overflow
 			jmp continue
 	end:
 			ret
 addition endp
+
+; y altadd and subtraction assume that no 0000 0000 0000 0000 0000 0000 0000 0000 section will exist in the number. Need to fix this.
 
 altadd proc ; should be more efficient
 	mov eax, [edi]
@@ -96,6 +99,7 @@ altadd proc ; should be more efficient
 	ret
 altadd endp
 
+
 subtraction proc
 ; [esi] - [edi]
 	mov eax, [edi]
@@ -116,6 +120,7 @@ subtraction proc
 			jne loop
 	ret	
 subtraction endp
+
 
 bignum_mul proc
 ; just copy the behaivor of mul
@@ -144,6 +149,7 @@ bignum_mul proc
 		ret
 bignum_mul endp
 
+
 ; wip section
 
 multiply_dword proc
@@ -158,7 +164,7 @@ multiply_dword proc
 		je loop
 		add eax, ecx
 	loop:
-		add ecx, ecx
+		shl edx, 1
 		shr edx, 1
 		cmp edx, 1
 		jbe end
@@ -168,12 +174,43 @@ multiply_dword proc
 		ret
 multiply_dword endp
 
-multiplication proc
 
+multiplication proc
+	load:
+		lea esi, BIGNUM
+		lea edi, OPERATOR
+		mov eax, 65536 ; set our counter
+	OPset:
+		add edi, 4
+		dec eax
+		jne OPset ; keep going if not z
+	stuff:
+		
+	increment:
+		add edi, 4
+		add esi, 4
+	decrement:
+		sub edi, 4
+		sub esi, 4
+	double: ; double the first column
+		shl [esi], 1
+		add esi, 4
+		adc [esi], 0 ; we don't need to handle possible overflow here
+	halve: ; halve the first column
+		shr [edi], 1
+		sub edi, 4
+		jnc stuff ; continue if no carry
+		;if carry add 2^31
+		add 10000000000000000000000000000000b ; 2^31 we don't need to handle overflow
+		jmp stuff
+	end:
+		xor eax, eax
+		ret
 multiplication endp
 
 altmul proc
 ; [esi] * [edi]
 altmul endp
+
 
 END
