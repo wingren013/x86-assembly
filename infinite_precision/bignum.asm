@@ -77,7 +77,7 @@ addition proc
 			ret
 addition endp
 
-; y altadd and subtraction assume that no 0000 0000 0000 0000 0000 0000 0000 0000 section will exist in the number. Need to fix this.
+; my altadd and subtraction assume that no 0000 0000 0000 0000 0000 0000 0000 0000 section will exist in the number. Need to fix this due to not treating numbers as a string of dwords for multiplication.
 
 altadd proc ; should be more efficient
 	mov eax, [edi]
@@ -176,33 +176,33 @@ multiply_dword endp
 
 
 multiplication proc
+	lea edx, ANSWER
 	load:
 		lea esi, BIGNUM
 		lea edi, OPERATOR
-		mov eax, 65536 ; set our counter
+		mov ecx, 65536 ; set our counter
 	OPset:
 		add edi, 4
-		dec eax
-		jne OPset ; keep going if not z
-	stuff:
-		
-	increment:
-		add edi, 4
-		add esi, 4
-	decrement:
-		sub edi, 4
-		sub esi, 4
+		dec ecx
+		jne OPset ; keep going if not zero
 	double: ; double the first column
 		shl [esi], 1
 		add esi, 4
 		adc [esi], 0 ; we don't need to handle possible overflow here
+		add ecx, 1 ;increment our counter
 	halve: ; halve the first column
 		shr [edi], 1
 		sub edi, 4
-		jnc stuff ; continue if no carry
+		jnc test_for_even ; continue if no carry
 		;if carry add 2^31
 		add 10000000000000000000000000000000b ; 2^31 we don't need to handle overflow
-		jmp stuff
+	test_for_even:
+		test [edi+4], 1b
+		je loop
+		add [edx], [esi-4]
+	loop:
+		cmp ecx, 65536
+		jne double
 	end:
 		xor eax, eax
 		ret
